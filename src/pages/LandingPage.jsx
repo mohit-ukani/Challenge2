@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+
 
 /**
  * LandingPage — Hero section with features overview and CTA.
  */
 export default function LandingPage() {
-  const { user } = useAuth();
+
 
   return (
     <div className="landing">

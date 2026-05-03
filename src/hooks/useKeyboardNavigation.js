@@ -13,7 +13,7 @@ import { useCallback } from 'react';
 export function useKeyboardNavigation(items, currentId, onSelect) {
   const handleKeyDown = useCallback((e) => {
     const idx = items.indexOf(currentId);
-    let newIdx = idx;
+    let newIdx;
 
     switch (e.key) {
       case 'ArrowRight':

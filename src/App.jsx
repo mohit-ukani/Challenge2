@@ -72,7 +72,7 @@ export default function App() {
               <div className="app" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <SkipLink />
                 <Header />
-                <main id="main-content" tabIndex={-1} style={{ flex: 1 }}>
+                <main id="main-content" tabIndex={-1} style={{ flex: 1 }} role="main">
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
                       <Route path="/" element={<LandingPage />} />

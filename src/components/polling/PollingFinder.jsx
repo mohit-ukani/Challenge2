@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import PollingCard from './PollingCard';
 import { validateZipCode, sanitizeInput } from '../../lib/validators';
@@ -14,7 +14,6 @@ function MapHandler({ pin, searchTrigger, onResults, onCenter, onLoading }) {
   const map = useMap();
   const placesLib = useMapsLibrary('places');
   const geocodingLib = useMapsLibrary('geocoding');
-  const [hasSearched, setHasSearched] = useState(0);
 
   useEffect(() => {
     if (!map || !geocodingLib || !placesLib || searchTrigger === 0) return;
@@ -54,7 +53,7 @@ function MapHandler({ pin, searchTrigger, onResults, onCenter, onLoading }) {
           };
 
           service.nearbySearch(request, (placesResults, status) => {
-            let finalResults = [];
+            let finalResults;
             
             if (status === placesLib.PlacesServiceStatus.OK && placesResults && placesResults.length > 0) {
               finalResults = placesResults.slice(0, 8).map((p, idx) => ({
@@ -106,7 +105,7 @@ function MapHandler({ pin, searchTrigger, onResults, onCenter, onLoading }) {
     };
 
     performSearch();
-  }, [searchTrigger, map, placesLib, geocodingLib]);
+  }, [searchTrigger, map, placesLib, geocodingLib, onCenter, onLoading, onResults, pin]);
 
   return null;
 }
@@ -138,13 +137,13 @@ export default function PollingFinder() {
 
     setError('');
     setSearched(true);
+    setIsLoading(true);
     setSearchTrigger(prev => prev + 1);
   }, [zipCode]);
 
   // Fallback for when Google Maps API key is missing
   useEffect(() => {
     if (searchTrigger > 0 && (!MAPS_KEY || MAPS_KEY === 'dummy')) {
-      setIsLoading(true);
       const timer = setTimeout(() => {
         const mockResults = [
           {
