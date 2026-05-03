@@ -1,0 +1,51 @@
+steps:
+  # Step 1: Build the Docker image with build-time args
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg=VITE_FIREBASE_API_KEY=$_VITE_FIREBASE_API_KEY'
+      - '--build-arg=VITE_FIREBASE_AUTH_DOMAIN=$_VITE_FIREBASE_AUTH_DOMAIN'
+      - '--build-arg=VITE_FIREBASE_PROJECT_ID=$_VITE_FIREBASE_PROJECT_ID'
+      - '--build-arg=VITE_FIREBASE_STORAGE_BUCKET=$_VITE_FIREBASE_STORAGE_BUCKET'
+      - '--build-arg=VITE_FIREBASE_MESSAGING_SENDER_ID=$_VITE_FIREBASE_MESSAGING_SENDER_ID'
+      - '--build-arg=VITE_FIREBASE_APP_ID=$_VITE_FIREBASE_APP_ID'
+      - '--build-arg=VITE_GOOGLE_MAPS_API_KEY=$_VITE_GOOGLE_MAPS_API_KEY'
+      - '--build-arg=VITE_GOOGLE_MAPS_MAP_ID=$_VITE_GOOGLE_MAPS_MAP_ID'
+      - '--build-arg=VITE_GOOGLE_CALENDAR_CLIENT_ID=$_VITE_GOOGLE_CALENDAR_CLIENT_ID'
+      - '--build-arg=VITE_GOOGLE_CALENDAR_API_KEY=$_VITE_GOOGLE_CALENDAR_API_KEY'
+      - '--build-arg=VITE_GEMINI_API_KEY=$_VITE_GEMINI_API_KEY'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/voters-journey:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/voters-journey:latest'
+      - '.'
+
+  # Step 2: Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/voters-journey:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/voters-journey:latest']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'voters-journey'
+      - '--image=gcr.io/$PROJECT_ID/voters-journey:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=256Mi'
+      - '--cpu=1'
+      - '--max-instances=10'
+      - '--min-instances=0'
+
+images:
+  - 'gcr.io/$PROJECT_ID/voters-journey:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/voters-journey:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
